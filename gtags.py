@@ -13,9 +13,8 @@ import sublime
 PP = pprint.PrettyPrinter(indent=4)
 
 TAGS_RE = re.compile(
-    '(?P<symbol>[^\s]+)\s+'
-    '(?P<linenum>[^\s]+)\s+'
-    '(?P<path>[^\s]+)\s+'
+    '(?P<path>[^:]+):'
+    '(?P<linenum>[^:]+):'
     '(?P<signature>.*)'
 )
 
@@ -99,7 +98,6 @@ class TagFile(object):
         else:
             lines = self.subprocess.stdout(
             'global %s %s' % (options, pattern)).splitlines()
-        
 
         matches = []
         for search_obj in (t for t in (TAGS_RE.search(l) for l in lines) if t):
@@ -107,7 +105,7 @@ class TagFile(object):
         return matches
 
     def match(self, pattern, reference=False):
-        return self._match(pattern, '-ax' + ('r' if reference else ''))
+        return self._match(pattern, '--result grep -a' + ('r' if reference else ''))
 
     def rebuild(self):
         retcode, stderr = self.subprocess.call('gtags -v', cwd=self.__root)
